@@ -36,5 +36,5 @@ npm run start
 Откройте Apollo Studio в браузере:
 
 ```bash
-http://localhost:3000/graphql
+http://localhost:5001/graphql
 ```

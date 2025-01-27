@@ -2,14 +2,27 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type AuthResponse {
+  access_token: String!
+}
+
 type Criterion {
   access: Boolean!
   id: String!
   title: String!
 }
 
+type Mutation {
+  signIn(signInInput: SignInInput!): AuthResponse!
+}
+
 type Query {
   user: User!
+}
+
+input SignInInput {
+  password: String!
+  username: String!
 }
 
 type User {

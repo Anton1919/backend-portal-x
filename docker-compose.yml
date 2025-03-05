@@ -1,0 +1,37 @@
+version: '3.7'
+
+services:
+  db:
+    container_name: postgres # условное название контейнера
+    image: postgres:15.2 # образ который мы будем юзать для docker
+    restart: always # при сбое контейнера мы будем его всегда перезапускать
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER} # это твои данные для БД и берем их из env файла
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    ports:
+      - 5433:5432
+    volumes: # это объемы для хранениея данных postgresql
+      - postgres_data:/var/lib/postgresql/data # данные этой БД будут храниться по этому пути
+    networks:
+      - backend
+
+  redis:
+    container_name: redis
+    image: redis:5.0
+    restart: always
+    ports:
+      - 6379:6379
+    command: redis-server --requirepass ${REDIS_PASSWORD}
+    volumes:
+      - redis_data:/data
+    networks:
+      - backend
+
+# ниже определяем объемы для хранения данных
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  backend:

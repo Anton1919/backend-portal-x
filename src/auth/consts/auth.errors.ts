@@ -12,3 +12,9 @@ export const LOGIN_INVALID_PASSWORD_MESSAGE =
 
 export const LOGOUT_FAILED_MESSAGE =
   'Не удалось завершить сессию. Возможно, возникла проблема с сервером или сессия уже была завершена.'
+
+export const NOT_ENOUGH_RIGHTS_MESSAGE =
+  'Недостаточно прав. У вас нет прав доступа к этому ресурсу.'
+
+export const UNAUTHORIZED_ERROR_MESSAGE =
+  'Пользователь не авторизован. Пожалуйста, войдите в систему, чтобы получить доступ.'

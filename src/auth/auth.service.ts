@@ -19,12 +19,16 @@ import {
   LOGOUT_FAILED_MESSAGE,
   SESSION_SAVE_MESSAGE,
 } from './consts/auth.errors'
+import { ProviderService } from './provider/provider.service'
+import { PrismaService } from '../prisma/prisma.service'
 
 @Injectable()
 export class AuthService {
   public constructor(
+    private readonly prismaService: PrismaService,
     private readonly userService: UserService,
-    private readonly configService: ConfigService, // он позволит нам, как минимум, брать данные из файла .env
+    private readonly configService: ConfigService,
+    private readonly providerService: ProviderService, // он позволит нам, как минимум, брать данные из файла .env
   ) {}
 
   public async register(req: Request, dto: RegisterDto) {
@@ -61,6 +65,54 @@ export class AuthService {
     }
 
     return this.saveSession(req, user)
+  }
+
+  public async extractProfileFromCode(
+    req: Request,
+    provider: string,
+    code: string,
+  ) {
+    const providerInstance = this.providerService.findByService(provider)
+    const profile = await providerInstance?.findUserByCode(code)
+
+    const account = await this.prismaService.account.findFirst({
+      where: {
+        id: profile?.id,
+        provider: profile?.provider,
+      },
+    })
+
+    let user = account?.userId
+      ? await this.userService.findById(account.userId)
+      : null
+
+    if (user) {
+      return this.saveSession(req, user)
+    } else if (!user && profile) {
+      user = await this.userService.create(
+        profile.email,
+        '',
+        profile.name,
+        profile.picture,
+        AuthMethod[profile.provider.toUpperCase()],
+        true,
+      )
+    }
+
+    if (!account && profile) {
+      await this.prismaService.account.create({
+        data: {
+          userId: user?.id,
+          type: 'oauth',
+          provider: profile.provider,
+          accessToken: profile.access_token,
+          refreshToken: profile.refresh_token,
+          expiredAt: profile.expires_at as number,
+        },
+      })
+    }
+
+    return this.saveSession(req, user as User)
   }
 
   public async logout(req: Request, res: Response): Promise<void> {
